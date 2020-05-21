@@ -7,7 +7,7 @@ var Goods = require('../models/goods');
 mongoose.connect('mongodb://127.0.0.1:27017/dumall',{useNewUrlParser: true,useUnifiedTopology: true});
 //连接成功
 mongoose.connection.on("connected",()=>{
-    console.log("MongoDB connected success.")
+    console.log("routes/goods MongoDB connected success.")
 });
 //连接失败
 mongoose.connection.on("error",()=>{
@@ -79,13 +79,9 @@ router.get("/list",(req,res,next)=>{
 router.get("/goodsList",(req,res,next)=>{
     let page = parseInt(req.param("page"));/**页码 */
     let pageSize = parseInt(req.param("pageSize"));/**一页多少条数据 */
-
     // let sort = req.param("sort");/**将sort作为实现排序的参数，req.param获取前端传过来的参数 */
     let params = {};
-
-
-
-
+    console.log(`请求管理商品界面数据成功了`)
     let skip = (page-1)*pageSize;/**计算分页的公式，当前页码减去1，乘以pageSize,实际上skip就是个索引值 */
     let productsModel  = Goods.find(params).skip(skip).limit(pageSize);/**find查找所有数据,.skip是默认跳过几条数据 */
     // productsModel.sort({'salePrice':sort});
@@ -272,15 +268,15 @@ function randomNum(minNum,maxNum){
             return 0;
             break;
     }
-}
+};
 /**添加商品**/
 router.post("/addProduct",(req,res,next)=>{
     var productName = req.body.productName;
     var salePrice = req.body.salePrice;
-    var goodNum = req.body.goodNum;
+    var productNum = req.body.productNum;
 
     var goods = new Goods({
-        productName,salePrice,goodNum,
+        productName,salePrice,productNum,
         productId:randomNum(202010000,20209999)
     });
     goods.save((err,doc)=>{
@@ -298,5 +294,59 @@ router.post("/addProduct",(req,res,next)=>{
             })
         }
     })
-})
+});
+/**删除商品**/
+router.post("/delGood",(req,res,next)=>{
+    var goodRow = req.body.row;
+    var productId = req.body.row.productId;
+    console.log(`删除的productId是：${productId}`);
+    Goods.remove(goodRow,(err,doc)=>{
+        if(err){
+            res.json({
+                status:'1',
+                msg:err.message,
+                result:''
+            })
+            console.error(err)
+        }else{
+
+            res.json({
+                status:'0',
+                msg:'',
+                result:'suc'
+            });
+            console.error("商品删除成功"+doc)
+        }
+    })
+});
+/**修改商品**/
+router.post("/editGood",(req,res,next)=>{
+    let productId = req.body.productId;
+    let productName = req.body.productName;
+    let salePrice = req.body.salePrice;
+    let productNum = req.body.productNum;
+
+    console.log(`服务端接收到的商品id是${productId}，名称是${productName}，单价是${salePrice},数量是${productNum}`);
+    Goods.update({
+        "productId":productId,
+    },{
+        "productName" : productName,
+        "salePrice" : salePrice,
+        "productNum" : productNum,
+    },(err,doc)=>{
+        if(err){
+            res.json({
+                status:'1',
+                msg:err.message,
+                result:'',
+            });
+        }else{
+            res.json({
+                status:'0',
+                msg:'',
+                result:'suc',
+            })
+        }
+    })
+});
 module.exports = router;

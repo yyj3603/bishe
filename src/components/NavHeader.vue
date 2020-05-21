@@ -30,9 +30,24 @@
         <div class="navbar-menu-container">
           <!--<a href="/" class="navbar-link">我的账户</a>-->
           <!--nickName是true才显示-->
-          <span class="navbar-link" v-text="nickName" v-if="nickName"></span>
+          <a href="javascript:void(0)" class="navbar-link" v-text="nickName" v-if="nickName" ></a>
           <a href="javascript:void(0)" class="navbar-link" @click="loginModalFlag=true" v-if="!nickName">Login</a>
           <a href="javascript:void(0)" class="navbar-link" v-if="nickName" @click="logOut">Logout</a>
+          <a href="javascript:void(0)" class="navbar-link"  @click="getUsersInformation">about Me</a>
+
+          <el-dialog title="您的个人信息" class="navbar-link" :visible.sync="dialogTableVisible">
+            <el-table :data="userData">
+              <el-table-column property="createUserDate" label="创建日期" width="150"></el-table-column>
+              <el-table-column property="userName" label="姓名" width="200"></el-table-column>
+              <el-table-column property="gender" label="性别"></el-table-column>
+              <el-table-column property="age" label="年龄"></el-table-column>
+              <el-table-column  property="subjectsList[0].subjectName" label="课程"></el-table-column>
+              <el-table-column  property="subjectsList[0].startTime" label="课程开始时间"></el-table-column>
+              <el-table-column  property="subjectsList[0].endTime" label="课程结束时间"></el-table-column>
+            </el-table>
+
+          </el-dialog>
+
           <router-link class="navbar-link" to="/aboutUs">about Us</router-link>
           <div class="navbar-cart-container">
             <span class="navbar-cart-count" v-if="cartCount>0">{{cartCount}}</span>
@@ -72,17 +87,26 @@
           </div>
           <div class="login-wrap">
             <a href="javascript:;" class="btn-login" @click="login">登 录</a>
+<!--            <el-button-->
+<!--                    plain-->
+<!--                    class="btn-login"-->
+<!--                    @click="login">-->
+<!--              登录-->
+<!--            </el-button>-->
           </div>
+
         </div>
       </div>
     </div>
     <!--遮罩层-->
+
     <div class="md-overlay" v-if="loginModalFlag" @click="loginModalFlag=false"></div>
   </header>
 </template>
 
 <script>
   import './../assets/css/login.css'
+
   import axios from 'axios'
 
   export default {
@@ -93,11 +117,16 @@
         userId: '',
         errorTip: false, //true就显示用户名或密码错误提示，false就不显示
         loginModalFlag: false,//控制用户登录框
+        /**用户信息弹框中的用户数据**/
+        userData:[],
+        dialogTableVisible:false,
+
 
       }
     },
     mounted() {
       this.checkLogin();
+
     },
     computed:{
       /*
@@ -112,15 +141,11 @@
     },
     methods: {
       /**是否跳转到管理页面根据ID判断**/
-
       /*测试*/
-
       checkLogin(){
         axios.get("/users/checkLogin").then((response)=>{
           var res = response.data;
-
           if(res.status=="0"){
-//                      this.nickName = res.result;
             this.$store.commit("updateUserInfo",res.result);
             this.getCartCount();
             this.loginModalFlag = false;
@@ -129,7 +154,9 @@
       },
       login() {
         /*如果userName或者userPwd是false*/
+        console.log(`login调用1，userName：${this.userName}`)
         if (!this.userName || !this.userPwd) {
+          console.log(`login调用2，userName：${this.userName}`)
           this.errorTip = true;
           return;
         }
@@ -149,6 +176,18 @@
             this.$store.commit("updateUserInfo",res.result.userName)
             // this.nickName = res.result.userName;
             this.getCartCount();
+            this.$notify({
+              title: '成功',
+              message: '用户登录成功',
+              type: 'success'
+            });
+
+            console.log(`这句话如果成功输出，可尝试在这里增添判断用户是否管理员账户，如果是进行路由跳转${this.userName}和${this.userId}`);
+            if(this.userName=="admin"){
+              console.log(`是管理员`);
+              /**是管理员账户，跳转到adminView页面**/
+              this.$router.push("/adminView")
+            }
           } else {
             this.errorTip = true;
           }
@@ -160,12 +199,34 @@
           if (res.status == "0") {
             /*说明登出成功*/
             // this.nickName = "";
+            this.$notify({
+              title: '警告',
+              message: '注意您已退出登录',
+              type: 'warning'
+            });
+
             this.$store.commit("updateUserInfo",'');//登出，用户名改为空
 
           }
         })
       },
-
+      /**获取用户数据**/
+      getUsersInformation(){
+        this.dialogTableVisible = true
+        console.log("调用getUsersInformation，此方法用来获取顾客信息")
+        axios.get("/users/information").then(response =>{
+          let res = response.data;
+          console.log(`请求进来了，res为${this.res}`)
+          if(res.status == "0") {
+            this.userData = res.result;
+            console.log(`数据获取成功：${this.userData[0].createUserDate}${res.result[0].userName}`)
+          }else {
+            /*数据请求失败*/
+            console.log(`数据获取失败`)
+            this.userData = [];
+          }
+        })
+      },
       getCartCount(){
         /*调用/getCartCount接口，通过then这种链式调用promise的结构来拿到数据*/
         axios.get("/users/getCartCount").then((response)=>{

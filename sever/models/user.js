@@ -10,6 +10,19 @@ var userSchema = new mongoose.Schema({
   "createUserDate" : String,
   "tel" : Number,
   "orderList" : Array,
+  "subjectsList":[
+    {
+      "subjectId" : String,
+      "subjectName" : String,
+      "role" : String,
+      "startTime" : String,
+      "endTime" : String,
+      "coachName" : String,
+      "coachId" : String,
+      "subjectPrice" : Number,
+    }
+
+  ],
   "cartList" : [
     {
       "productId" : String,

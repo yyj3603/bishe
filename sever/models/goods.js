@@ -8,7 +8,6 @@ var productSchema = new Schema({
     "productImage":String,
     "productNum" : Number,
     "checked" : String,
-    "goodNum" : Number,
 })
 
 module.exports = mongoose.model('Good',productSchema)/**在表中查找Good时会默认加一个s，即查找的会是名字为“goods”的表（collections） */

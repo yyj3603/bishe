@@ -8,7 +8,9 @@ import Address from './../views/Address'
 import OrderConfirm from './../views/OrderConfirm'
 import OrderSuccess from './../views/OrderSuccess'
 import AdminView from './../views/AdminView'
-import ManageGoods from './../views/manageGoods'
+import ManageGoods from '../views/ManageGoods'
+import ManageCoachs from '../views/ManageCoachs'
+import SubjectsList from '../views/SubjectsList'
 import AboutUs from './../views/AboutUs'
 import BaoBiao from './../views/Baobiao'
 /* import Image from '@/views/Image'
@@ -31,6 +33,11 @@ export default new Router({
       component:BaoBiao
     },
     {
+      path:'/subjectsList',
+      name:'SubjectsList',/*课程列表页面*/
+      component: SubjectsList
+    },
+    {
       path:'/aboutUs',
       name:'AboutUs',/*关于我们页面*/
       component: AboutUs
@@ -40,6 +47,12 @@ export default new Router({
       name:'ManageGoods',/*管理员才能访问的商品管理界面*/
       component:ManageGoods
     },
+    {
+      path: '/manageCoachs',
+      name:'ManageCoachs',/*管理员才能访问的私人教练管理界面*/
+      component:ManageCoachs
+    },
+
     {
       path: '/',
       name:'GoodsList',/*商品列表*/

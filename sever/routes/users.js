@@ -86,9 +86,7 @@ router.get("/checkLogin",(req,res,next)=>{
 router.get("/list",(req,res,next)=>{
   let page = parseInt(req.param("page"));/**页码 */
   let pageSize = parseInt(req.param("pageSize"));/**一页多少条数据 */
-
   let params = {};
-
   let skip = (page-1)*pageSize;/**计算分页的公式，当前页码减去1，乘以pageSize,实际上skip就是个索引值 */
   let usersModel = User.find(params).skip(skip).limit(pageSize);/**find查找所有数据,.skip是默认跳过几条数据 */
   usersModel.exec(function(err,doc){
@@ -98,7 +96,6 @@ router.get("/list",(req,res,next)=>{
         msg:err.message
       });
     }else{
-      console.log("doc"+doc);
       res.json({
         status:'0',/**0代表成功，1代表失败 */
         msg:'',
@@ -110,6 +107,24 @@ router.get("/list",(req,res,next)=>{
     }
   })
 });
+/**查询单个的用户信息**/
+router.get("/information",(req,res)=>{
+  let userId = req.cookies.userId;
+  User.find({userId:userId},(err,doc)=>{
+    if(err) {
+      res.json({
+        status:'1',
+        msg:err.message
+      });
+    }else{
+      res.json({
+        status:'0',/**0代表成功，1代表失败 */
+        msg:'',
+        result:doc
+      })
+    }
+  })
+})
 /*查询购物车商品数量*/
 router.get("/getCartCount",(req,res,next)=>{
   if(req.cookies && req.cookies.userId) {
@@ -168,9 +183,11 @@ router.get("/cartList",(req,res,next)=>{
 router.post("/cartDel",(req,res,next)=>{
   var userId = req.cookies.userId;
   var productId = req.body.productId;
+  console.log(`这边删除商品的商品Id是${productId}，用户Id是${userId}`);
   /*mongoose的API update*/
   User.update({
-    userId:userId?100000077:'',/*更新的条件:用户ID为100000077*/
+    // userId:userId?100000077:'',/*更新的条件:用户ID为100000077*/
+    userId:userId
   },{
     $pull:{/*要删除的数组元素*/
       'cartList':{
@@ -453,7 +470,7 @@ function randomNum(minNum,maxNum){
       break;
   }
 }
-/*添加会员*/
+/**添加会员**/
 router.post("/addUser",(req,res,next)=>{
   var userName = req.body.userName;
   var userPwd = req.body.userPwd;
@@ -494,13 +511,54 @@ router.post("/addUser",(req,res,next)=>{
   //   }
   // })
 });
+/**给会员添加课程**/
+router.post("/addSubject",(req,res,next)=>{
+    let userId = req.cookies.userId;
+    let userName = req.cookies.userName;
+    let id = req.body.subjectId;
+    let name = req.body.subjectName;
+    let role = req.body.role;
+    let startTime = req.body.startTime;
+    let endTime = req.body.endTime;
+    let coachName = req.body.coachName;
+    let price = req.body.price;
+    console.log(`添加课程接口进来了`);
+    console.log(`当前登录用户ID为：${userId},用户名为：${userName},课程：${name},id：${id},role:${role},startTime:${startTime},endTime:${endTime},教练名是：${coachName},课程价格：${price}`);
+    User.update({userId:userId},{
+      $addToSet: {/**要更新的数组元素**/
+      'subjectsList':{
+          'subjectId':id,
+          'subjectName':name,
+          'role':role,
+          'startTime':startTime,
+          'endTime':endTime
+        }
+
+      }
+    },(err,doc)=>{
+      if(err){
+        res.json({
+          status:'1',
+          msg:err.message,
+          result:'',
+        });
+      }else{
+        res.json({
+          status:'0',
+          msg:'',
+          result:'suc',
+        })
+      }
+    })
+})
 /**修改会员信息**/
 router.post("/editUser",(req,res,next)=>{
-  var userId = req.cookies.userId;
+  var userId = req.body.userId;
   var userName = req.body.userName;
   var userPwd = req.body.userPwd;
   var gender = req.body.gender;
   var age = req.body.age;
+  console.log(`userId是${userId}修改後的userName是${userName}修改後的gender是${gender}修改後的age是${age}`);
   User.update({
     "userId":userId,
   }, {
@@ -508,8 +566,7 @@ router.post("/editUser",(req,res,next)=>{
     "userPwd": userPwd,
     "gender": gender,
     "age": age
-  }),(err,doc)=>{
-
+  },(err,doc)=>{
     if(err){
       res.json({
         status:'1',
@@ -523,7 +580,42 @@ router.post("/editUser",(req,res,next)=>{
         result:'suc',
       })
     }
-  }
+  })
+});
+/**删除该会员**/
+// router.post("/delUser",(req,res,next)=>{
+//   var userId = req.params.userId;
+//   console.log(`这边删除的userId是：${this.userId}`)
+//   User.deleteOne(userId,function(error){
+//     if(error){
+//       console.error(error)
+//     }else{
+//       console.error("用户删除成功")
+//     }
+//   })
+// })
+router.post("/delUser",(req,res,next)=>{
+  var userId = req.body.row.userId;
+  var userIdRow = req.body.row;
+  console.log(`这边删除的userId是：${userId},row是：${req.body.row}`)
+  User.remove(userIdRow,function(err,doc){
+    if(err){
+      res.json({
+        status:'1',
+        msg:err.message,
+        result:''
+      })
+      console.error(err)
+    }else{
+
+      res.json({
+        status:'0',
+        msg:'',
+        result:'suc'
+      });
+      console.error("用户删除成功"+doc)
+    }
+  })
 })
 /*根据订单ID查询订单信息*/
 router.get("/orderDetail", function (req,res,next) {

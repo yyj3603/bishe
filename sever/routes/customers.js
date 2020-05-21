@@ -1,22 +1,22 @@
 let express = require("express");
 let router = express.Router();
-let mongoose = require('mongoose');
+// let mongoose = require('mongoose');
 let Customers = require("../models/customers");
 
-//连接MongoDB数据库
-mongoose.connect('mongodb://127.0.0.1:27017/dumall',{useNewUrlParser: true,useUnifiedTopology: true});
-//连接成功
-mongoose.connection.on("connected",()=>{
-    console.log("MongoDB connected success.")
-});
-//连接失败
-mongoose.connection.on("error",()=>{
-    console.log("MongoDB connected fail.")
-});
-//连接断开
-mongoose.connection.on("disconnected",()=>{
-    console.log("MongoDB connected disconnected.")
-});
+// //连接MongoDB数据库
+// mongoose.connect('mongodb://127.0.0.1:27017/dumall',{useNewUrlParser: true,useUnifiedTopology: true});
+// //连接成功
+// mongoose.connection.on("connected",()=>{
+//     console.log("routes/customers MongoDB connected success.")
+// });
+// //连接失败
+// mongoose.connection.on("error",()=>{
+//     console.log("MongoDB connected fail.")
+// });
+// //连接断开
+// mongoose.connection.on("disconnected",()=>{
+//     console.log("MongoDB connected disconnected.")
+// });
 
 /*查询顾客列表*/
 router.get("/list",(req,res,next)=>{

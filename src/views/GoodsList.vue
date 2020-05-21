@@ -50,6 +50,8 @@
                 >{{item.startPrice}}--{{item.endPrice}}</a>
               </dd>
             </dl>
+
+            <router-link to="/subjectsList">了解课程</router-link>
           </div>
 
           <!-- search result accessories list -->

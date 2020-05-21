@@ -217,7 +217,7 @@
     delCartConfirm(productId) {
       /*将productId全局保存,这样才能在delCart()里拿到这个productId来进行删除*/
       this.productId = productId;
-
+      console.log(`delCartConfirm方法中的this.productId为：${this.productId}`);
       this.modalConfirm = true;
     },
     /*删除这条数据*/
@@ -226,6 +226,7 @@
         productId:this.productId
       }).then((response)=>{
         let res = response.data;
+        console.log(`delCart方法.then之后productId为：${this.productId}`);
         if(res.status=='0'){
           this.modalConfirm = false;
           this.init();
